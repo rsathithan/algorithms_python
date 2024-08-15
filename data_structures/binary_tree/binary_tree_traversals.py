@@ -172,6 +172,10 @@ def zigzag(root: Node | None) -> Generator[int, None, None]:
     [1, 3, 2, 4, 5]
     """
     if root is None:
+        """
+        if the condition is true -> a tree is empty
+        stop further traversal
+        """
         return
 
     flag = 0
@@ -179,9 +183,18 @@ def zigzag(root: Node | None) -> Generator[int, None, None]:
 
     for h in range(1, height_tree + 1):
         if not flag:
+            """
+            when flag is set to 0, the condition evaluates to True
+            """
             yield from get_nodes_from_left_to_right(root, h)
             flag = 1
+            """
+            the subsequent else: statement will be executed because the condition if not flag: will no longer be True.
+            """
         else:
+            """
+            The flag is not 0
+            """
             yield from get_nodes_from_right_to_left(root, h)
             flag = 0
 
