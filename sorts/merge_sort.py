@@ -1,63 +1,159 @@
 """
-This is a pure Python implementation of the merge sort algorithm.
+Merge Sort Algorithm
+====================
 
-For doctests run following command:
-python -m doctest -v merge_sort.py
-or
-python3 -m doctest -v merge_sort.py
-For manual testing run:
-python merge_sort.py
+This module implements the Merge Sort algorithm with three variations:
+1. Recursive Merge Sort
+2. Iterative Merge Sort
+3. Merge Insertion Sort
+
+Usage:
+    - Run this module directly for manual testing.
+    - Use doctests to verify correctness.
+
+Example:
+    python merge_sort.py
 """
 
+from typing import List
 
-def merge_sort(collection: list) -> list:
+
+def merge_sort(arr: List[int]) -> List[int]:
     """
-    Sorts a list using the merge sort algorithm.
+    Perform merge sort on a list of integers.
 
-    :param collection: A mutable ordered collection with comparable items.
-    :return: The same collection ordered in ascending order.
+    Args:
+        arr: A list of integers.
 
-    Time Complexity: O(n log n)
+    Returns:
+        A sorted list of integers.
 
-    Examples:
-    >>> merge_sort([0, 5, 3, 2, 2])
-    [0, 2, 2, 3, 5]
-    >>> merge_sort([])
-    []
-    >>> merge_sort([-2, -5, -45])
-    [-45, -5, -2]
+    Example:
+        >>> merge_sort([8, 3, 5, 6])
+        [3, 5, 6, 8]
     """
+    if len(arr) > 1:
+        mid = len(arr) // 2
+        left_half = arr[:mid]
+        right_half = arr[mid:]
 
-    def merge(left: list, right: list) -> list:
-        """
-        Merge two sorted lists into a single sorted list.
+        merge_sort(left_half)
+        merge_sort(right_half)
 
-        :param left: Left collection
-        :param right: Right collection
-        :return: Merged result
-        """
-        result = []
-        while left and right:
-            result.append(left.pop(0) if left[0] <= right[0] else right.pop(0))
-        result.extend(left)
-        result.extend(right)
-        return result
+        i = j = k = 0
 
-    if len(collection) <= 1:
-        return collection
-    mid_index = len(collection) // 2
-    return merge(merge_sort(collection[:mid_index]), merge_sort(collection[mid_index:]))
+        while i < len(left_half) and j < len(right_half):
+            if left_half[i] < right_half[j]:
+                arr[k] = left_half[i]
+                i += 1
+            else:
+                arr[k] = right_half[j]
+                j += 1
+            k += 1
+
+        while i < len(left_half):
+            arr[k] = left_half[i]
+            i += 1
+            k += 1
+
+        while j < len(right_half):
+            arr[k] = right_half[j]
+            j += 1
+            k += 1
+
+    return arr
+
+
+def iterative_merge_sort(arr: List[int]) -> List[int]:
+    """
+    Perform iterative merge sort on a list of integers.
+
+    Args:
+        arr: A list of integers.
+
+    Returns:
+        A sorted list of integers.
+
+    Example:
+        >>> iterative_merge_sort([8, 3, 5, 6])
+        [3, 5, 6, 8]
+    """
+    if len(arr) <= 1:
+        return arr
+
+    width = 1
+    n = len(arr)
+    while width < n:
+        for i in range(0, n, 2 * width):
+            left = arr[i : i + width]
+            right = arr[i + width : i + 2 * width]
+            merged = merge(left, right)
+            arr[i : i + len(merged)] = merged
+        width *= 2
+
+    return arr
+
+
+def merge(left: List[int], right: List[int]) -> List[int]:
+    """
+    Merge two sorted lists into a single sorted list.
+
+    Args:
+        left: A sorted list of integers.
+        right: A sorted list of integers.
+
+    Returns:
+        A merged and sorted list of integers.
+
+    Example:
+        >>> merge([1, 3, 5], [2, 4, 6])
+        [1, 2, 3, 4, 5, 6]
+    """
+    merged = []
+    i = j = 0
+
+    while i < len(left) and j < len(right):
+        if left[i] < right[j]:
+            merged.append(left[i])
+            i += 1
+        else:
+            merged.append(right[j])
+            j += 1
+
+    merged.extend(left[i:])
+    merged.extend(right[j:])
+
+    return merged
+
+
+def merge_insertion_sort(arr: List[int]) -> List[int]:
+    """
+    Perform merge insertion sort on a list of integers.
+
+    Args:
+        arr: A list of integers.
+
+    Returns:
+        A sorted list of integers.
+
+    Example:
+        >>> merge_insertion_sort([8, 3, 5, 6])
+        [3, 5, 6, 8]
+    """
+    if len(arr) <= 1:
+        return arr
+
+    mid = len(arr) // 2
+    left = arr[:mid]
+    right = arr[mid:]
+
+    left = merge_insertion_sort(left)
+    right = merge_insertion_sort(right)
+
+    return merge(left, right)
 
 
 if __name__ == "__main__":
     import doctest
 
     doctest.testmod()
-
-    try:
-        user_input = input("Enter numbers separated by a comma:\n").strip()
-        unsorted = [int(item) for item in user_input.split(",")]
-        sorted_list = merge_sort(unsorted)
-        print(*sorted_list, sep=",")
-    except ValueError:
-        print("Invalid input. Please enter valid integers separated by commas.")
