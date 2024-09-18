@@ -55,6 +55,26 @@ class SmoSVM:
         tolerance=0.001,
         auto_norm=True,
     ):
+        """
+        Initialize SmoSVM with given parameters.
+
+        Args:
+            train (np.ndarray): Training data: first column: tags, rest: features.
+            kernel_func (Kernel): Kernel function to use.
+            alpha_list (np.ndarray, optional): Initial alpha values. Defaults to None.
+            cost (float, optional): Cost parameter C. Defaults to 0.4.
+            b (float, optional): Bias term. Defaults to 0.0.
+            tolerance (float, optional): Tolerance for optimization. Defaults to 0.001.
+            auto_norm (bool, optional): Whether to normalize the data. Defaults to True.
+
+        >>> from machine_learning.sequential_minimum_optimization import SmoSVM, Kernel
+        >>> kernel = Kernel(kernel='linear')
+        >>> train = np.array([[1, 2, 3], [-1, -2, -3]])
+        >>> svm = SmoSVM(train, kernel)
+        >>> svm.tags
+        array([ 1, -1])
+        """
+
         self._init = True
         self._auto_norm = auto_norm
         self._c = np.float64(cost)
@@ -383,9 +403,23 @@ class SmoSVM:
             return (data - self._min) / (self._max - self._min)
 
     def _is_unbound(self, index):
+        """
+        >>> from machine_learning.sequential_minimum_optimization import SmoSVM, Kernel
+        >>> kernel = Kernel(kernel='linear')
+        >>> svm = SmoSVM(np.array([[1, 2, 3], [-1, -2, -3]]), kernel)
+        >>> svm._is_unbound(1)
+        False
+        """
         return bool(0.0 < self.alphas[index] < self._c)
 
     def _is_support(self, index):
+        """
+        >>> from machine_learning.sequential_minimum_optimization import SmoSVM, Kernel
+        >>> kernel = Kernel(kernel='linear')
+        >>> svm = SmoSVM(np.array([[1, 2, 3], [-1, -2, -3]]), kernel)
+        >>> svm._is_support(1)
+        False
+        """
         return bool(self.alphas[index] > 0)
 
     @property
@@ -402,6 +436,13 @@ class SmoSVM:
 
 
 class Kernel:
+    """
+    >>> from machine_learning.sequential_minimum_optimization import Kernel
+    >>> kernel = Kernel(kernel='linear')
+    >>> kernel._kernel_name
+    'linear'
+    """
+
     def __init__(self, kernel, degree=1.0, coef0=0.0, gamma=1.0):
         self.degree = np.float64(degree)
         self.coef0 = np.float64(coef0)
@@ -411,12 +452,33 @@ class Kernel:
         self._check()
 
     def _polynomial(self, v1, v2):
+        """
+        >>> from machine_learning.sequential_minimum_optimization import Kernel
+        >>> kernel = Kernel(kernel='linear')
+        >>> result = kernel._polynomial(np.array([1, 2]), np.array([2, 3]))
+        >>> int(result) == 8
+        True
+        """
         return (self.gamma * np.inner(v1, v2) + self.coef0) ** self.degree
 
     def _linear(self, v1, v2):
+        """
+        >>> from machine_learning.sequential_minimum_optimization import Kernel
+        >>> kernel = Kernel(kernel='linear')
+        >>> result = kernel._polynomial(np.array([1, 2]), np.array([2, 3]))
+        >>> int(result) == 8
+        True
+        """
         return np.inner(v1, v2) + self.coef0
 
     def _rbf(self, v1, v2):
+        """
+        >>> from machine_learning.sequential_minimum_optimization import Kernel
+        >>> kernel = Kernel(kernel='linear')
+        >>> result = kernel._rbf(np.array([1, 2]), np.array([2, 3]))
+        >>> round(result, 3)
+        0.135
+        """
         return np.exp(-1 * (self.gamma * np.linalg.norm(v1 - v2) ** 2))
 
     def _check(self):
